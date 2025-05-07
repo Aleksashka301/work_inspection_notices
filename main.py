@@ -3,27 +3,8 @@ import requests
 import telegram
 
 
-def get_response(url, header):
-    while True:
-        try:
-            response = requests.get(url, headers=header, timeout=5)
-        except requests.exceptions.ReadTimeout:
-            response = requests.get(url, headers=header)
-
-        response.raise_for_status()
-        response = response.json()
-
-        try:
-            header['timestamp'] = str(response['timestamp_to_request'])
-        except KeyError:
-            header['timestamp'] = str(response['last_attempt_timestamp'])
-
-        if response['status'] == 'found':
-            return response
-
-
-def message_sending(url, header, bot, chat_id):
-    lesson_notice = get_response(url, header)['new_attempts'][0]
+def sending_message(response, bot, chat_id):
+    lesson_notice = response['new_attempts'][0]
     lesson = lesson_notice['lesson_title']
     lesson_link = lesson_notice['lesson_url']
 
@@ -47,4 +28,20 @@ if __name__ in '__main__':
     header = {'Authorization': dewman_token,}
     bot = telegram.Bot(token=telegram_token)
 
-    message_sending(dewman_url, header, bot, chat_id)
+    while True:
+        try:
+            response = requests.get(dewman_url, headers=header, timeout=60)
+            response.raise_for_status()
+            response = response.json()
+        except requests.exceptions.ReadTimeout:
+            continue
+
+        try:
+            header['timestamp'] = str(response['timestamp_to_request'])
+        except KeyError:
+            header['timestamp'] = str(response['last_attempt_timestamp'])
+
+        if response['status'] == 'found':
+            break
+
+    sending_message(response, bot, chat_id)
