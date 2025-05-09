@@ -3,7 +3,7 @@ import requests
 import telegram
 
 
-def sending_message(response, bot, chat_id):
+def send_notice(response, bot, chat_id):
     lesson_notice = response['new_attempts'][0]
     lesson = lesson_notice['lesson_title']
     lesson_link = lesson_notice['lesson_url']
@@ -42,6 +42,4 @@ if __name__ in '__main__':
             header['timestamp'] = str(response['last_attempt_timestamp'])
 
         if response['status'] == 'found':
-            break
-
-    sending_message(response, bot, chat_id)
+            send_notice(response, bot, chat_id)
