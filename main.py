@@ -53,20 +53,24 @@ if __name__ == '__main__':
 
     while True:
         try:
-            response = requests.get(dewman_url, headers=header, timeout=60)
-            response.raise_for_status()
-            response = response.json()
-        except requests.exceptions.ReadTimeout:
-            continue
+            try:
+                response = requests.get(dewman_url, headers=header, timeout=60)
+                response.raise_for_status()
+                response = response.json()
+            except requests.exceptions.ReadTimeout:
+                continue
+            except Exception as error:
+                logging.exception(error)
+                logging.critical('Работа бота прекращена!')
+                break
+
+            try:
+                header['timestamp'] = str(response['timestamp_to_request'])
+            except KeyError:
+                header['timestamp'] = str(response['last_attempt_timestamp'])
+
+            if response['status'] == 'found':
+                send_notice(response, bot, chat_id)
         except Exception as error:
             logging.exception(error)
-            logging.critical('Работа бота прекращена!')
-            break
-
-        try:
-            header['timestamp'] = str(response['timestamp_to_request'])
-        except KeyError:
-            header['timestamp'] = str(response['last_attempt_timestamp'])
-
-        if response['status'] == 'found':
-            send_notice(response, bot, chat_id)
+            continue
