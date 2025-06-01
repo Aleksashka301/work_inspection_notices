@@ -19,6 +19,7 @@ var/
 wheels/
 share/python-wheels/
 .idea
+ssh_devman_key
 *.egg-info/
 .installed.cfg
 *.egg
