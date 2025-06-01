@@ -59,7 +59,7 @@ if __name__ == '__main__':
         except requests.exceptions.ReadTimeout:
             continue
         except Exception as error:
-            logging.error(f'Ошибка при запросе к API: {error}')
+            logging.exception(error)
             logging.critical('Работа бота прекращена!')
             break
 
